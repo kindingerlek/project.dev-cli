@@ -1,0 +1,11 @@
+{
+    "name": "kindingerlek.dev-cli",
+    "displayName": "Developer CLI",
+    "version": "1.0.0",
+    "unity": "2019.1",
+    "description": "Some words here!",
+    "keywords": ["Tool", "CLI", "Runtime"],
+    "category": "Controllers",
+    "dependencies": {
+    }
+}
