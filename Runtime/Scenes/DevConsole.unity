@@ -1832,6 +1832,7 @@ GameObject:
   - component: {fileID: 856555038}
   - component: {fileID: 856555040}
   - component: {fileID: 856555041}
+  - component: {fileID: 856555042}
   m_Layer: 5
   m_Name: UIDocument
   m_TagString: Untagged
@@ -1888,7 +1889,7 @@ MonoBehaviour:
   warningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   errorColor: {r: 1, g: 0, b: 0, a: 1}
   logColor: {r: 1, g: 1, b: 1, a: 1}
-  _ShowOnStart: 0
+  _ShowOnStart: 1
 --- !u!114 &856555041
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1901,6 +1902,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b32c2053ed5f12046a49c0d13c0174c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &856555042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 856555037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7c25fdf213a8b2449ff5df065d902a3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetAreaId: window-bar
+  targetId: DevCliWindow
+  shouldReturn: 0
+  contraintToViewPort: 1
 --- !u!1 &867649735
 GameObject:
   m_ObjectHideFlags: 0
