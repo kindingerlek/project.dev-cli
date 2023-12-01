@@ -1,0 +1,241 @@
+:root {
+    --input-bg: rgb(53, 53, 53);
+    --input-bg-hover: rgb(68, 68, 68);
+    --input-bg-active: rgb(36, 36, 36);
+    --input-text: rgb(230, 230, 230);
+    --icon-size: 14px;
+    --icon-info: url('project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=2346436936791262179&guid=72262283a2eb8594bbd920577c59c6de&type=3#console.infoicon');
+    --icon-warn: url('project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=4584671053970592468&guid=72262283a2eb8594bbd920577c59c6de&type=3#console.warnicon');
+    --icon-error: url('project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/UnityThemes/UnityDefaultRuntimeTheme.tss?fileID=8228938214290033325&guid=72262283a2eb8594bbd920577c59c6de&type=3#console.erroricon');
+    --font-definition-ubuntu: url('project://database/Packages/kindingerlek.dev-cli/Runtime/Fonts/UbuntuMono-R%20SDF%201.asset?fileID=11400000&guid=3cced7bd259b28d4ea36769fd80eed77&type=2#UbuntuMono-R SDF 1');
+    --font-asset-ubuntu: url('project://database/Packages/kindingerlek.dev-cli/Runtime/Fonts/UbuntuMono-R.ttf?fileID=12800000&guid=bf1c6b00313a93d4fb450fb222a019ee&type=3#UbuntuMono-R');
+}
+
+.cli-textfield {
+    flex-grow: 1;
+    margin-left: 2px;
+    margin-right: 0;
+    margin-bottom: 2px;
+    font-size: 10px;
+}
+
+.cli-toggle {
+    margin-right: 0;
+}
+
+.cli-toggle > VisualElement {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    min-width: var(--icon-size);
+    min-height: var(--icon-size);
+}
+
+.cli-toggle .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.25);
+}
+
+.cli-toggle:checked .unity-toggle__checkmark {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}
+
+.cli-toggle-log.cli-toggle .unity-toggle__checkmark {
+    background-image: var(--icon-info);
+}
+
+.cli-toggle-warning.cli-toggle .unity-toggle__checkmark {
+    background-image: var(--icon-warn);
+}
+
+.cli-toggle-error.cli-toggle .unity-toggle__checkmark {
+    background-image: var(--icon-error);
+}
+
+.cli-scrollview {
+    flex-grow: 1;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-top: 1px;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.cli-scrollview Label {
+    flex-grow: 1;
+    flex-wrap: wrap;
+    -unity-text-align: lower-left;
+    white-space: normal;
+    font-size: 10px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.cli-scrollview #unity-content-container {
+}
+
+#window {
+    background-color: rgb(9, 9, 9);
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    min-width: 420px;
+    min-height: 400px;
+    max-width: 1100px;
+    max-height: 800px;
+    height: auto;
+    flex-direction: column;
+}
+
+#window-bar {
+    height: 20px;
+    flex-direction: row;
+    color: rgb(255, 255, 255);
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#window-content {
+    background-color: rgb(34, 34, 34);
+    flex-grow: 1;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#window-bar > Label {
+    -unity-text-align: middle-left;
+    -unity-font-style: bold;
+    justify-content: center;
+    font-size: 10px;
+    flex-grow: 1;
+    padding-left: 6px;
+}
+
+#close-button {
+    width: 12px;
+    height: 12px;
+    background-color: rgb(255, 0, 0);
+    align-items: flex-end;
+    margin-left: 0;
+    margin-right: 2px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    justify-content: center;
+}
+
+#close-button:hover {
+    background-color: rgb(200, 200, 200);
+}
+
+#content-header {
+    height: 24px;
+    flex-direction: row;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+#content-header > VisualElement {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+#content-header #clear-button {
+    font-size: 9px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+#content-header > Toggle {
+    -unity-text-align: middle-left;
+    font-size: 10px;
+    flex-direction: row-reverse;
+}
+
+#content-header > Toggle > Label {
+    margin-left: 6px;
+    margin-right: 2px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    justify-content: center;
+    min-width: auto;
+    flex-grow: 1;
+    font-size: 10px;
+}
+
+#content-footer {
+    height: 26px;
+    flex-direction: row;
+}
+
+#content-footer .unity-text-field {
+    align-items: stretch;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-grow: 1;
+    flex-basis: auto;
+}
+
+#content-footer #unity-text-input {
+    -unity-font-definition: var(--font-definition-ubuntu);
+    -unity-font: var(--font-asset-ubuntu);
+    align-items: auto;
+    flex-shrink: 1;
+    justify-content: flex-start;
+    opacity: 1;
+    flex-direction: column-reverse;
+}
+
+#content-footer > Button {
+    margin-right: 2px;
+}
+
+#placeholder-label {
+    -unity-font-definition: var(--font-definition-ubuntu);
+    -unity-font: var(--font-asset-ubuntu);
+    font-size: 10px;
+    color: rgb(122, 122, 122);
+    overflow: hidden;
+    -unity-font-style: normal;
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
+
+.content-label {
+    -unity-font-definition: var(--font-definition-ubuntu);
+    -unity-font: var(--font-asset-ubuntu);
+    max-height: 100%;
+}

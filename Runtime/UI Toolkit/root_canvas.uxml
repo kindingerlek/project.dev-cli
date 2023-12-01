@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:Template name="DevCliWindow" src="project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/DevCliWindow.uxml?fileID=9197481963319205126&amp;guid=700c1b9132708b3418b33404e069caf9&amp;type=3#DevCliWindow" />
+    <Style src="project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/DevCliWindowStyle.uss?fileID=7433441132597879392&amp;guid=981a384369f316140b9112bf9351db23&amp;type=3#DevCliWindowStyle" />
+    <ui:Instance template="DevCliWindow" name="DevCliWindow" style="align-items: center; justify-content: center; position: absolute; left: 772px; top: 370px;" />
+</ui:UXML>

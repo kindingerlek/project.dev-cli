@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/DevCliWindowStyle.uss?fileID=7433441132597879392&amp;guid=981a384369f316140b9112bf9351db23&amp;type=3#DevCliWindowStyle" />
+    <Style src="project://database/Packages/kindingerlek.dev-cli/Runtime/UI%20Toolkit/unity-runtime-theme.uss?fileID=7433441132597879392&amp;guid=9d1202bffc0eb4f4e896280fc039404d&amp;type=3#unity-runtime-theme" />
+    <ui:VisualElement name="window">
+        <ui:VisualElement name="window-bar">
+            <ui:Label text="Developer Console" display-tooltip-when-elided="true" name="window-label" />
+            <ui:Button display-tooltip-when-elided="true" name="close-button" />
+        </ui:VisualElement>
+        <ui:VisualElement name="window-content">
+            <ui:VisualElement name="content-header">
+                <ui:VisualElement>
+                    <ui:Button text="Clear" display-tooltip-when-elided="true" name="clear-button" class="cli-button round-corners" />
+                    <ui:Toggle tooltip="Toggle Debug" name="info-toggle" class="cli-toggle cli-toggle-log" />
+                    <ui:Toggle tooltip="Toggle Warning" name="warn-toggle" class="cli-toggle cli-toggle-warning" />
+                    <ui:Toggle tooltip="Toggle Error" name="error-toggle" class="cli-toggle cli-toggle-error" />
+                </ui:VisualElement>
+                <ui:Toggle label="Show Engine Logs" value="false" focusable="false" name="showlogs-toggle" class="cli-toggle" />
+            </ui:VisualElement>
+            <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" class="cli-scrollview">
+                <ui:Label text="&gt; some command" display-tooltip-when-elided="true" name="content-label" class="content-label" />
+            </ui:ScrollView>
+            <ui:VisualElement name="content-footer">
+                <ui:TextField picking-mode="Ignore" value="text-value" name="command-input" class="cli-textfield">
+                    <ui:Label display-tooltip-when-elided="false" name="placeholder-label" />
+                </ui:TextField>
+                <ui:Button text="SUBMIT" display-tooltip-when-elided="true" name="submit-button" class="cli-button" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

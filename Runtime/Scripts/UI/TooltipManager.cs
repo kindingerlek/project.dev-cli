@@ -10,8 +10,8 @@ namespace Tools.UI
         private const string StandardSpritePath = "UI/Skin/UISprite.psd";
         private const string BackgroundSpriteResourcePath = "UI/Skin/Background.psd";
 
-        private static Color panelColor = new Color(1f, 1f, 1f, 1f);
-        private static Color textColor = new Color(0.2f, 0.2f, 0.2f, 1f);
+        private static Color panelColor = new (1f, 1f, 1f, 1f);
+        private static Color textColor = new (0.2f, 0.2f, 0.2f, 1f);
 
 
         [SerializeField]
@@ -60,9 +60,10 @@ namespace Tools.UI
         private Canvas GetCanvas()
         {
             GameObject gObj = GameObject.Find("TooltipCanvas") ?? new GameObject("TooltipCanvas", typeof(Canvas));
+            
 
             if(Application.isPlaying)
-                DontDestroyOnLoad(gObj);
+                DontDestroyOnLoad(this.gameObject);
 
             canvas = gObj.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;

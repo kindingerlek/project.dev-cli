@@ -1,0 +1,237 @@
+:root {
+    --base-color: hsl(0, 0%, 10%);
+    --base-color-hover: hsl(0, 0%, 10%);
+    --base-color-active: hsl(0, 0%, 10%);
+    --base-color-focus: hsl(0, 0%, 10%);
+    --base-color-disabled: hsl(0, 0%, 10%);
+
+    --base-dark-color: hsl(0, 0%, 10%);
+    --base-dark-color-hover: hsl(0, 0%, 10%);
+    --base-dark-color-active: hsl(0, 0%, 10%);
+    --base-dark-color-focus: hsl(0, 0%, 10%);
+    --base-dark-color-disabled: hsl(0, 0%, 10%);
+
+    --base-light-color: hsl(0, 0%, 10%);
+    --base-light-color-hover: hsl(0, 0%, 10%);
+    --base-light-color-active: hsl(0, 0%, 10%);
+    --base-light-color-focus: hsl(0, 0%, 10%);
+    --base-light-color-disabled: hsl(0, 0%, 10%);
+
+    --color-hover: hsl(0, 0%, 60%);
+    --color-scroll: hsl(0, 0%, 9%);
+    --color-tracker-background: hsl(0, 0%, 18%);
+    --color-tracker-border: hsl(0, 0%, 24%);
+    --color-tracker-tint: hsl(0, 0%, 30%);
+
+    --input-bg: hsl(0, 0%, 21%);
+    --input-bg-hover: hsl(0, 0%, 27%);
+    --input-bg-active: hsl(0, 0%, 14%);
+    --input-text: hsl(0, 0%, 90%);
+
+    --scroll-size: 10px;
+    --border-radius-default: 3px;
+    --border-radius-small: 1px;
+}
+
+.unity-button {
+    background-color: var(--input-bg);
+
+    border-color: transparent;
+
+    color: var(--input-text);
+    font-size: 10px;
+    margin-left: 2px;
+    margin-right: 2px;
+        
+	border-top-left-radius: var(--border-radius-default);
+	border-bottom-left-radius: var(--border-radius-default);
+	border-top-right-radius: var(--border-radius-default);
+	border-bottom-right-radius: var(--border-radius-default);
+}
+
+.unity-button:hover {
+    background-color: var(--input-bg-hover);
+
+    border-color: var(--color-hover);
+
+    border-left-width: var(--border-radius-small);
+    border-right-width: var(--border-radius-small);
+    border-top-width: var(--border-radius-small);
+    border-bottom-width: var(--border-radius-small);
+}
+
+.unity-button:active {
+    background-color: var(--input-bg-active);
+}
+
+.unity-base-text-field {
+    --unity-selection-color: #858585;
+    --unity-cursor-color: var(--input-text);
+	background-color: var(--input-bg);
+	color: var(--input-text);
+	border-width: 0px;
+	border-radius: var(--border-radius-default);
+
+    border-top-left-radius: var(--border-radius-default);
+    border-bottom-left-radius: var(--border-radius-default);
+    border-top-right-radius: var(--border-radius-default);
+    border-bottom-right-radius: var(--border-radius-default);   
+}
+
+.unity-base-text-field__input {
+    
+    background-color: transparent;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+
+    margin-left: 0;
+
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.unity-base-text-field__input:hover {
+    background-color: var(--input-bg-hover);
+}
+
+.unity-base-text-field__input:active {
+    background-color: var(--input-bg-active);
+}
+
+.unity-toggle__input {
+    border-top-left-radius: var(--border-radius-default);
+    border-bottom-left-radius: var(--border-radius-default);
+    border-top-right-radius: var(--border-radius-default);
+    border-bottom-right-radius: var(--border-radius-default);
+}
+
+.unity-toggle {
+    margin-top: auto;
+    margin-bottom: auto;
+    color: var(--input-text);
+}
+
+.unity-toggle:focus {
+	color: var(--input-text);
+}
+
+.unity-toggle__checkmark {    
+    -unity-background-image-tint-color: var(--input-text);
+    background-color: var(--input-bg);
+    height: 100%;
+    width: 100%;
+
+    border-color: transparent;
+
+    border-left-width: var(--border-radius-small);
+    border-right-width: var(--border-radius-small);
+    border-top-width: var(--border-radius-small);
+    border-bottom-width: var(--border-radius-small);
+}
+
+
+.unity-toggle:hover .unity-toggle__checkmark {
+    background-color: var(--input-bg-hover);
+    border-color: var(--color-hover);
+}
+
+.unity-toggle:active .unity-toggle__checkmark {
+    background-color: var(--input-bg-active);
+}
+
+
+.unity-base-slider .unity-base-slider__tracker {
+    background-color: var(--color-tracker-background);
+
+    border-left-width: 0;
+    border-color: var(--color-tracker-border);
+}
+
+.unity-base-slider .unity-base-slider__dragger {    
+    width: auto;
+    
+    left: 1px;
+    right: 1px;
+
+    border-top-left-radius: var(--border-radius-small);
+    border-bottom-left-radius: var(--border-radius-small);
+    border-top-right-radius: var(--border-radius-small);
+    border-bottom-right-radius: var(--border-radius-small);
+
+	background-color: var(--color-tracker-tint);
+}
+
+.unity-base-slider .unity-base-slider__dragger:hover {
+	background-color: var(--color-hover);
+}
+
+.unity-base-slider .unity-base-slider__dragger:active {
+	background-color: var(--color-hover);
+}
+
+.unity-base-slider .unity-base-slider__dragger:focus {
+	background-color: var(--color-hover);
+}
+
+.unity-base-slider .unity-base-slider__dragger:enabled {
+	border-color: transparent;
+}
+
+.unity-base-slider .unity-base-slider__dragger:checked {
+	background-color: var(--color-hover);
+}
+
+.unity-scroller .unity-repeat-button {
+	background-color: var(--color-tracker-background);
+    border-width: 0px;
+    -unity-background-image-tint-color: var(--color-tracker-tint);
+
+    
+    width: var(--scroll-size);
+    height: var(--scroll-size);
+}
+
+.unity-scroller .unity-repeat-button:hover {
+	background-color: var(--color-hover);
+}
+
+.unity-scroller__high-button {
+	border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+}
+.unity-scroller__low-button {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+.unity-scroller--vertical{
+    width: var(--scroll-size);
+}
+
+.unity-scroller--horizontal{
+	height: var(--scroll-size);
+}
+
+.unity-scroller--vertical #unity-slider {
+    min-width: auto;
+    width: 100%;
+
+    margin-top: var(--scroll-size);
+    margin-bottom: var(--scroll-size);
+}
+
+.unity-scroll-view 
+{
+    background-color: var(--color-scroll);
+
+    border-top-left-radius: var(--border-radius-default);
+    border-bottom-left-radius: var(--border-radius-default);
+    border-top-right-radius: var(--border-radius-default);
+    border-bottom-right-radius: var(--border-radius-default);
+
+    color: var(--input-text);
+}
