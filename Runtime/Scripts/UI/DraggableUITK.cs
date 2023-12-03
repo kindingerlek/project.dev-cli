@@ -17,9 +17,6 @@ namespace Tools.UI
         private string targetId = "window";
 
         [SerializeField]
-        private bool shouldReturn = false;
-
-        [SerializeField]
         private bool contraintToViewPort = true;
 
         private bool isMouseDown = false;
