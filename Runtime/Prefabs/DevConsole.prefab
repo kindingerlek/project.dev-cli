@@ -69,7 +69,7 @@ MonoBehaviour:
   warningColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   errorColor: {r: 1, g: 0, b: 0, a: 1}
   logColor: {r: 1, g: 1, b: 1, a: 1}
-  _ShowOnStart: 1
+  _ShowOnStart: 0
 --- !u!114 &3911217734398688959
 MonoBehaviour:
   m_ObjectHideFlags: 0
