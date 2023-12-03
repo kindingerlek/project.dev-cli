@@ -28,9 +28,9 @@ namespace Tools.DevConsole.UI
         const string LABEL_PLACEHOLDER = "placeholder-label";
         const string LABEL_CONTENT = "content-label";
 
+        const string CLI_WINDOW = "DevCliWindow";
 
         public UIDocument _UIDocument;
-        public VisualTreeAsset _VisualTreeAsset;
 
 
         [Header("Colors")]
@@ -54,7 +54,7 @@ namespace Tools.DevConsole.UI
         private Label _label__content;
         private Label _label__placeholder;
         private TextField _inputField;
-        private VisualElement _inputFieldContainer;
+        private VisualElement _cli__window;
 
 
         private float _defaultTimeScale = 1f;
@@ -65,29 +65,27 @@ namespace Tools.DevConsole.UI
         public void Start()
         {
             _UIDocument = GetComponent<UIDocument>();
-            _VisualTreeAsset = _UIDocument.visualTreeAsset;
-
             _defaultTimeScale = Time.timeScale;
-            ShowConsoleUI(_ShowOnStart);
 
             consoleLog ??= DevConsole.Logger ??= new ConsoleLog(MessageType.LOG);
             consoleLog.OnReceiveMessage += OnReceiveNewMessage;
             consoleLog.OnClear += Refresh;
 
-            _button__close = _UIDocument.rootVisualElement.Q<Button>(CLOSE_BUTTON);
-            _button__clear = _UIDocument.rootVisualElement.Q<Button>(CLEAR_BUTTON);
-            _button__submit = _UIDocument.rootVisualElement.Q<Button>(SUBMIT_BUTTON);
+            // UI Elements assignment
+            _cli__window = Q<VisualElement>(CLI_WINDOW);
 
-            _toggle__info = _UIDocument.rootVisualElement.Q<Toggle>(INFO_TOGGLE);
-            _toggle__warn = _UIDocument.rootVisualElement.Q<Toggle>(WARN_TOGGLE);
-            _toggle__error = _UIDocument.rootVisualElement.Q<Toggle>(ERROR_TOGGLE);
-            _toggle__showlogs = _UIDocument.rootVisualElement.Q<Toggle>(SHOWLOGS_TOGGLE);
+            _button__close = Q<Button>(CLOSE_BUTTON);
+            _button__clear = Q<Button>(CLEAR_BUTTON);
+            _button__submit = Q<Button>(SUBMIT_BUTTON);
 
-            _label__placeholder = _UIDocument.rootVisualElement.Q<Label>(LABEL_PLACEHOLDER);
-            _label__content = _UIDocument.rootVisualElement.Q<Label>(LABEL_CONTENT);
+            _toggle__info = Q<Toggle>(INFO_TOGGLE);
+            _toggle__warn = Q<Toggle>(WARN_TOGGLE);
+            _toggle__error = Q<Toggle>(ERROR_TOGGLE);
+            _toggle__showlogs = Q<Toggle>(SHOWLOGS_TOGGLE);
 
-            _inputField = _UIDocument.rootVisualElement.Q<TextField>(COMMAND_INPUT);
-            _inputFieldContainer = _inputField.Q<VisualElement>("unity-text-input");
+            _label__placeholder = Q<Label>(LABEL_PLACEHOLDER);
+            _label__content = Q<Label>(LABEL_CONTENT);
+            _inputField = Q<TextField>(COMMAND_INPUT);
 
 
             // Events assignment
@@ -100,27 +98,46 @@ namespace Tools.DevConsole.UI
             _toggle__error.RegisterValueChangedCallback(OnToggleFilterChange);
             _toggle__showlogs.RegisterValueChangedCallback(OnToggleUnityLogChange);
 
-
             _inputField.RegisterValueChangedCallback(OnCommandInputChange);
             _inputField.RegisterCallback<KeyDownEvent>(OnKeydownInput);
 
+            // Set the default values
             _label__content.text = string.Empty;
             _label__placeholder.text = string.Empty;
 
             _toggle__info.value = true;
             _toggle__warn.value = true;
             _toggle__error.value = true;
-
+                        
+            // Move the placeholder label to the back of the text from input field
             _label__placeholder.SendToBack();
+
+            StartCoroutine(AlignCenter());
+            ShowConsoleUI(_ShowOnStart);
+        }
+
+        public T Q <T>(string name) where T : VisualElement
+        {
+            return _UIDocument.rootVisualElement.Q<T>(name);
+        }
+
+        // Since the UI is created at runtime, we need to wait for the next frame to align it to the center of the screen
+        public IEnumerator AlignCenter()
+        {
+            yield return new WaitForEndOfFrame();
+            var windowSize = _cli__window.contentRect.size;
+            var screenSize = new Vector2(Screen.width, Screen.height);
+
+            var margin = (screenSize - windowSize) / 2f;
+
+            _cli__window.style.marginLeft = margin.x;
+            _cli__window.style.marginTop = margin.y;
         }
 
         public void OnValidate()
         {
             if (_UIDocument == null)
                 _UIDocument = GetComponent<UIDocument>();
-
-            if (_VisualTreeAsset == null)
-                _VisualTreeAsset = _UIDocument.visualTreeAsset;
         }
 
         public void Update()

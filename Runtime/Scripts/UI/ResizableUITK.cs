@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using Tools.EditorExtensions;
 using UnityEngine.UIElements;
+using System.Linq;
 
 namespace Tools.UI
 {
@@ -13,6 +14,7 @@ namespace Tools.UI
         [System.Flags]
         private enum ResizablePoints
         {
+            None = 0,
             TopLeft = 1,
             Top = 2,
             TopRight = 4,
@@ -39,55 +41,40 @@ namespace Tools.UI
 
         Dictionary<ResizablePoints, Vector2> growDirection = new()
         {
-            {ResizablePoints.TopLeft | ResizablePoints.BottomRight, new Vector2( 1.0f, 1.0f)},
-            {ResizablePoints.Left    | ResizablePoints.Right,       new Vector2( 1.0f, 0.0f)},
-            {ResizablePoints.Top     | ResizablePoints.Bottom,      new Vector2( 0.0f, 1.0f)},
+            {ResizablePoints.TopLeft,       new Vector2(1.0f, 1.0f)},
+            {ResizablePoints.Top,           new Vector2(0.0f, 1.0f)},
+            {ResizablePoints.TopRight,      new Vector2(1.0f, 1.0f)},
+            {ResizablePoints.Left,          new Vector2(1.0f, 0.0f)},
+            {ResizablePoints.Right,         new Vector2(1.0f, 0.0f)},
+            {ResizablePoints.BottomLeft,    new Vector2(1.0f, 1.0f)},
+            {ResizablePoints.Bottom,        new Vector2(0.0f, 1.0f)},
+            {ResizablePoints.BottomRight,   new Vector2(1.0f, 1.0f)}
 
         };
 
         [SerializeField] private string targetId = "window";
 
         [Header("Resizable Points")]
-        [SerializeField, EnumMask] private ResizablePoints resizablePoints;
+        [SerializeField, EnumMask] private ResizablePoints resizablePoints = (ResizablePoints)255;
         [SerializeField] private Vector2 sensitiveArea = new(7, 7);
+
+        [Header("Constraints")]
+        [SerializeField] private bool enableMinSize = true;
+        [SerializeField] private bool enableMaxSize = true;
         [SerializeField] private Vector2 minSize = new(420, 400);
         [SerializeField] private Vector2 maxSize = new(1100, 800);
 
         private ResizablePoints lastUsedPoint;
 
-        private Vector2 currentPointerPosition;
         private Vector2 previousPointerPosition;
         private Vector2 relativePointerPosition;
+        private Vector2 previousContentSize;
 
         private UIDocument document;
         private VisualElement target;
 
-        private bool shouldResize;
         private bool isMouseDown;
 
-        public Vector2 MaxSize
-        {
-            get => maxSize;
-            set
-            {
-                maxSize = value;
-
-                target.style.maxWidth = maxSize.x;
-                target.style.maxHeight = maxSize.y;
-            }
-        }
-
-        public Vector2 MinSize
-        {
-            get => minSize;
-            set
-            {
-                minSize = value;
-
-                target.style.minWidth = minSize.x;
-                target.style.minHeight = minSize.y;
-            }
-        }
 
         void Awake()
         {
@@ -105,11 +92,11 @@ namespace Tools.UI
                 return;
             }
 
-            MinSize = new Vector2(target.style.minWidth.value.value, target.style.minHeight.value.value);
-            MaxSize = new Vector2(target.style.maxWidth.value.value, target.style.maxHeight.value.value);
-
+            if (enableMinSize) target.style.minWidth = minSize.x;
+            if (enableMaxSize) target.style.maxWidth = maxSize.x;
 
             target.RegisterCallback<PointerDownEvent>(OnPointerDown);
+            target.RegisterCallback<PointerMoveEvent>(OnPointerMove);
         }
 
         public void OnPointerUp(PointerUpEvent data)
@@ -121,64 +108,65 @@ namespace Tools.UI
         {
             isMouseDown = true;
 
-            var rectTransform = target.contentContainer.contentRect;
+            var mousePosition = Input.mousePosition;
 
-            //RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, data.position, Camera.current, out previousPointerPosition);
-            //relativePointerPosition = (previousPointerPosition * new Vector2(1, -1)) / rectTransform.sizeDelta;
-            
-            shouldResize = IsValidResizablePoint();
+            previousContentSize = target.contentRect.size;
+            relativePointerPosition = data.localPosition / previousContentSize;
+            previousPointerPosition = new Vector2(mousePosition.x, Screen.height - mousePosition.y);
+
+            lastUsedPoint = GetResizePoint();
         }
 
-        public void OnPointerEnter(PointerEventData eventData)
+        public void OnPointerMove(PointerMoveEvent data)
         {
+            var resizePoint = GetResizePoint();
 
+            if(resizePoint == ResizablePoints.None)
+                return;
+
+            //TODO: Add cursor change on hover
         }
+
+
 
         public void Update()
         {
-            if (!shouldResize || !isMouseDown)
+            if (!isMouseDown || lastUsedPoint == ResizablePoints.None)
                 return;
 
-
-            //Vector2 sizeDelta = target.contentRect.size;
-
-            //RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, Input.mousePosition, Camera.current, out currentPointerPosition);
-            //Vector2 resizeValue = currentPointerPosition - previousPointerPosition;
-
-            //sizeDelta += new Vector2(resizeValue.x, -resizeValue.y);
+            if (Input.GetMouseButtonUp(0))
+            {
+                isMouseDown = false;
+                return;
+            }
 
 
-            //sizeDelta = new Vector2(
-            //    Mathf.Clamp(sizeDelta.x, minSize.x, maxSize.x),
-            //    Mathf.Clamp(sizeDelta.y, minSize.y, maxSize.y)
-            //    );
+            Vector2 currentMouse = new(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+            Vector2 mouseDiff = currentMouse - previousPointerPosition;
+            Vector2 diff = mouseDiff * growDirection[lastUsedPoint];
 
+            var sizeDelta = previousContentSize + diff;
 
-            //Debug.Log(
-            //        $"sizeDelta: {sizeDelta}\n" +
-            //        $"resizeValue: {resizeValue}\n" +
-            //        $"rectTransform.sizeDelta: {rectTransform.sizeDelta}\n" +
-            //        "");
-
-            //rectTransform.sizeDelta = sizeDelta;
-
-            //previousPointerPosition = currentPointerPosition;
+            target.style.width = sizeDelta.x;
+            target.style.height = sizeDelta.y;
         }
 
-        public bool IsValidResizablePoint()
+        private ResizablePoints GetResizePoint()
         {
-            Debug.Log("IsValidResizablePoint " + resizablePoints);
             foreach (var pVect in pointsToVector)
             {
                 if ((resizablePoints & pVect.Key) == 0)
                     continue;
 
-                Vector2 diff = (pVect.Value - relativePointerPosition) * target.contentRect.size;
+
+                Vector2 diff = (relativePointerPosition - pVect.Value) * target.contentRect.size;
+                diff = new Vector2(Mathf.Abs(diff.x), Mathf.Abs(diff.y));
+
 
                 if (diff.x > 0 && diff.y > 0 && diff.x <= sensitiveArea.x && diff.y <= sensitiveArea.y)
-                    return true;
+                    return pVect.Key;
             }
-            return false;
+            return ResizablePoints.None;
         }
 
     }
