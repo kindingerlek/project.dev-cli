@@ -26,8 +26,8 @@ namespace Tools.DevConsole
             consoleLog.MaxLogRegister = 1000;
 
             DevConsole.Logger = consoleLog;
-            GetComponent<DevConsoleUI>().consoleLog = consoleLog;
-
+            //GetComponent<DevConsoleUI>().consoleLog = consoleLog;
+            GetComponent<DevConsoleUITK>().consoleLog = consoleLog;
         }
     } 
 }
