@@ -1,6 +1,8 @@
 {
     "name": "kindingerlek-devcli.",
+    "rootNamespace": "",
     "references": [
+        "GUID:776d03a35f1b52c4a9aed9f56d7b4229",
         "GUID:62a9a258fb2bccb44b4c8a47c08fbb0b"
     ],
     "includePlatforms": [],

@@ -5,29 +5,32 @@ using System.Collections.Generic;
 using Tools.EditorExtensions;
 using UnityEngine.UIElements;
 using System.Linq;
+using NaughtyAttributes;
 
 namespace Tools.UI
 {
     [RequireComponent(typeof(UIDocument))]
     public class ResizableUITK : MonoBehaviour
     {
+        const ResizablePoints ALL_RESIZABLE_POINTS = (ResizablePoints) (1 << 8) - 1;
+
         [System.Flags]
         private enum ResizablePoints
         {
-            None = 0,
-            TopLeft = 1,
-            Top = 2,
-            TopRight = 4,
+            None        = 0,
+            TopLeft     = 1 << 0,
+            Top         = 1 << 1,
+            TopRight    = 1 << 2,
 
-            Left = 8,
-            Right = 16,
+            Left        = 1 << 3,
+            Right       = 1 << 4,
 
-            BottomLeft = 32,
-            Bottom = 64,
-            BottomRight = 128,
+            BottomLeft  = 1 << 5,
+            Bottom      = 1 << 6,
+            BottomRight = 1 << 7
         }
 
-        Dictionary<ResizablePoints, Vector2> pointsToVector = new()
+        readonly Dictionary<ResizablePoints, Vector2> pointsToVector = new()
         {
             {ResizablePoints.TopLeft,       new Vector2( 0.0f, 0.0f)},
             {ResizablePoints.Top,           new Vector2( 0.5f, 0.0f)},
@@ -39,7 +42,7 @@ namespace Tools.UI
             {ResizablePoints.BottomRight,   new Vector2( 1.0f, 1.0f)}
         };
 
-        Dictionary<ResizablePoints, Vector2> growDirection = new()
+        readonly Dictionary<ResizablePoints, Vector2> growDirection = new()
         {
             {ResizablePoints.TopLeft,       new Vector2(1.0f, 1.0f)},
             {ResizablePoints.Top,           new Vector2(0.0f, 1.0f)},
@@ -49,20 +52,21 @@ namespace Tools.UI
             {ResizablePoints.BottomLeft,    new Vector2(1.0f, 1.0f)},
             {ResizablePoints.Bottom,        new Vector2(0.0f, 1.0f)},
             {ResizablePoints.BottomRight,   new Vector2(1.0f, 1.0f)}
-
         };
+
+
 
         [SerializeField] private string targetId = "window";
 
         [Header("Resizable Points")]
-        [SerializeField, EnumMask] private ResizablePoints resizablePoints = (ResizablePoints)255;
+        [SerializeField, EnumFlags] private ResizablePoints resizablePoints = ALL_RESIZABLE_POINTS;
         [SerializeField] private Vector2 sensitiveArea = new(7, 7);
 
         [Header("Constraints")]
         [SerializeField] private bool enableMinSize = true;
         [SerializeField] private bool enableMaxSize = true;
-        [SerializeField] private Vector2 minSize = new(420, 400);
-        [SerializeField] private Vector2 maxSize = new(1100, 800);
+        [SerializeField, EnableIf("enableMinSize")] private Vector2 minSize = new(420, 400);
+        [SerializeField, EnableIf("enableMaxSize")] private Vector2 maxSize = new(1100, 800);
 
         private ResizablePoints lastUsedPoint;
 
@@ -140,9 +144,13 @@ namespace Tools.UI
                 return;
             }
 
+            Resize();
+        }
 
+        private void Resize()
+        {
             Vector2 currentMouse = new(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-            Vector2 mouseDiff = currentMouse - previousPointerPosition;
+            Vector2 mouseDiff = (currentMouse - previousPointerPosition) / UiHelper.GetScale(document.panelSettings);
             Vector2 diff = mouseDiff * growDirection[lastUsedPoint];
 
             var sizeDelta = previousContentSize + diff;
@@ -160,8 +168,9 @@ namespace Tools.UI
 
 
                 Vector2 diff = (relativePointerPosition - pVect.Value) * target.contentRect.size;
-                diff = new Vector2(Mathf.Abs(diff.x), Mathf.Abs(diff.y));
 
+                // Make sure the diff is always positive
+                diff = new Vector2(Mathf.Abs(diff.x), Mathf.Abs(diff.y));                
 
                 if (diff.x > 0 && diff.y > 0 && diff.x <= sensitiveArea.x && diff.y <= sensitiveArea.y)
                     return pVect.Key;

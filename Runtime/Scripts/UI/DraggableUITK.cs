@@ -27,6 +27,7 @@ namespace Tools.UI
         private VisualElement targetArea;
         private VisualElement target;
 
+        private PanelSettings panelSettings;
 
         public void Start()
         {
@@ -36,6 +37,9 @@ namespace Tools.UI
                 Debug.LogError("UIDocument not found");
                 return;
             }
+
+            if (panelSettings == null)
+                panelSettings = uiDocument.panelSettings;
 
             target = uiDocument.rootVisualElement.Q<VisualElement>(targetId);
             if (target == null)
@@ -72,42 +76,48 @@ namespace Tools.UI
         // Update is called once per frame
         void Update()
         {
-            if (isMouseDown)
+            if (!isMouseDown)
+                return;
+
+            // Force release the mouse capture even if the mouse is not over the element anymore
+            if (Input.GetMouseButtonUp(0))
             {
-                // Force release the mouse capture even if the mouse is not over the element anymore
-                if (Input.GetMouseButtonUp(0))
-                {
-                    isMouseDown = false;
-                    return;
-                }
-
-                Vector2 mouseDiff = (Vector2)Input.mousePosition - startMousePosition;
-                Vector2 mouseDiffScreen = new(mouseDiff.x, -mouseDiff.y);
-
-                Vector2 contentSize = target.contentRect.size;
-                Vector2 viewPortSize = new (Screen.width, Screen.height);
-
-
-                targetPosition = rectStartPosition + mouseDiffScreen;
-
-                if (contraintToViewPort)
-                {
-                    if (targetPosition.x < 0)
-                        targetPosition.x = 0;
-                    else if (targetPosition.x + contentSize.x > viewPortSize.x)
-                        targetPosition.x = viewPortSize.x - contentSize.x;
-
-                    if (targetPosition.y < 0)
-                        targetPosition.y = 0;
-                    else if (targetPosition.y + contentSize.y > viewPortSize.y)
-                        targetPosition.y = viewPortSize.y - contentSize.y;
-                }
-
-
-                //TODO: apply lerping
-                target.style.marginLeft = targetPosition.x;
-                target.style.marginTop = targetPosition.y;
+                isMouseDown = false;
+                return;
             }
+
+            Move();
+        }
+
+        public void Move()
+        {
+            Vector2 mouseDiff = (Vector2)Input.mousePosition - startMousePosition;
+            Vector2 mouseDiffScreen = new(mouseDiff.x, -mouseDiff.y);
+
+            Vector2 contentSize = target.contentRect.size;
+
+            var scale = UiHelper.GetScale(panelSettings);
+            Vector2 viewPortSize = UiHelper.GetScaledViewport(panelSettings);
+
+            targetPosition = rectStartPosition + (mouseDiffScreen / scale);            
+
+            if (contraintToViewPort)
+            {
+                if (targetPosition.x < 0)
+                    targetPosition.x = 0;
+                else if (targetPosition.x + contentSize.x > viewPortSize.x)
+                    targetPosition.x = viewPortSize.x - contentSize.x;
+
+                if (targetPosition.y < 0)
+                    targetPosition.y = 0;
+                else if (targetPosition.y + contentSize.y > viewPortSize.y)
+                    targetPosition.y = viewPortSize.y - contentSize.y;
+            }
+
+
+            //TODO: apply learping
+            target.style.marginLeft = targetPosition.x;
+            target.style.marginTop = targetPosition.y;
         }
     }
 }

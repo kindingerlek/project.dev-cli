@@ -108,7 +108,7 @@ namespace Tools.DevConsole.UI
             _toggle__info.value = true;
             _toggle__warn.value = true;
             _toggle__error.value = true;
-                        
+
             // Move the placeholder label to the back of the text from input field
             _label__placeholder.SendToBack();
 
@@ -116,7 +116,7 @@ namespace Tools.DevConsole.UI
             ShowConsoleUI(_ShowOnStart);
         }
 
-        public T Q <T>(string name) where T : VisualElement
+        public T Q<T>(string name) where T : VisualElement
         {
             return _UIDocument.rootVisualElement.Q<T>(name);
         }
