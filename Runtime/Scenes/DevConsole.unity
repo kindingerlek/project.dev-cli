@@ -262,17 +262,5 @@ PrefabInstance:
       propertyPath: m_Name
       value: UIDocument
       objectReference: {fileID: 0}
-    - target: {fileID: 3911217734398688957, guid: e1ece99239781fd47afad8bd9723e375, type: 3}
-      propertyPath: enableMaxSize
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3911217734398688957, guid: e1ece99239781fd47afad8bd9723e375, type: 3}
-      propertyPath: enableMinSize
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3911217734398688957, guid: e1ece99239781fd47afad8bd9723e375, type: 3}
-      propertyPath: resizablePoints
-      value: -1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e1ece99239781fd47afad8bd9723e375, type: 3}

@@ -22,7 +22,6 @@ namespace Tools.UI
         private bool isMouseDown = false;
         private Vector2 startMousePosition;
         private Vector2 rectStartPosition;
-        private Vector2 targetPosition;
 
         private VisualElement targetArea;
         private VisualElement target;
@@ -73,7 +72,6 @@ namespace Tools.UI
             isMouseDown = false;
         }
 
-        // Update is called once per frame
         void Update()
         {
             if (!isMouseDown)
@@ -94,30 +92,38 @@ namespace Tools.UI
             Vector2 mouseDiff = (Vector2)Input.mousePosition - startMousePosition;
             Vector2 mouseDiffScreen = new(mouseDiff.x, -mouseDiff.y);
 
-            Vector2 contentSize = target.contentRect.size;
 
             var scale = UiHelper.GetScale(panelSettings);
-            Vector2 viewPortSize = UiHelper.GetScaledViewport(panelSettings);
 
-            targetPosition = rectStartPosition + (mouseDiffScreen / scale);            
+            Vector2 targetPosition = rectStartPosition + (mouseDiffScreen / scale);            
 
             if (contraintToViewPort)
-            {
-                if (targetPosition.x < 0)
-                    targetPosition.x = 0;
-                else if (targetPosition.x + contentSize.x > viewPortSize.x)
-                    targetPosition.x = viewPortSize.x - contentSize.x;
-
-                if (targetPosition.y < 0)
-                    targetPosition.y = 0;
-                else if (targetPosition.y + contentSize.y > viewPortSize.y)
-                    targetPosition.y = viewPortSize.y - contentSize.y;
-            }
+                targetPosition = ApplyConstraints(targetPosition);
 
 
             //TODO: apply learping
             target.style.marginLeft = targetPosition.x;
             target.style.marginTop = targetPosition.y;
+        }
+
+        private Vector2 ApplyConstraints(Vector2 targetPosition)
+        {
+            Vector2 contentSize = target.contentRect.size;
+            var viewPortSize = UiHelper.GetScaledViewport(panelSettings);
+
+            if (targetPosition.x < 0)
+                targetPosition.x = 0;
+
+            if (targetPosition.x + contentSize.x > viewPortSize.x)
+                targetPosition.x = viewPortSize.x - contentSize.x;
+
+            if (targetPosition.y < 0)
+                targetPosition.y = 0;
+
+            if (targetPosition.y + contentSize.y > viewPortSize.y)
+                targetPosition.y = viewPortSize.y - contentSize.y;
+
+            return targetPosition;
         }
     }
 }

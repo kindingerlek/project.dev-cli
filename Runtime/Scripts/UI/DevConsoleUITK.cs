@@ -126,7 +126,7 @@ namespace Tools.DevConsole.UI
         {
             yield return new WaitForEndOfFrame();
             var windowSize = _cli__window.contentRect.size;
-            var screenSize = new Vector2(Screen.width, Screen.height);
+            var screenSize = UiHelper.GetScaledViewport(_UIDocument.panelSettings);
 
             var margin = (screenSize - windowSize) / 2f;
 
