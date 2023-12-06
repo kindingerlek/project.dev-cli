@@ -95,7 +95,7 @@
 }
 
 .unity-base-text-field__input:hover {
-    background-color: var(--input-bg-hover);
+    /* background-color: var(--input-bg-hover); */
 }
 
 .unity-base-text-field__input:active {

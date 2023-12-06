@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Tools.DevConsole.Interfaces;
+using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
@@ -39,6 +40,7 @@ namespace Tools.DevConsole.UI
         [SerializeField] private Color errorColor = Color.red;
         [SerializeField] private Color logColor = Color.white;
         [SerializeField] private bool _ShowOnStart = false;
+        [SerializeField] private bool _ShowUnityLogs = false;
 
         internal IConsoleLog consoleLog;
 
@@ -60,7 +62,7 @@ namespace Tools.DevConsole.UI
         private float _defaultTimeScale = 1f;
         private bool _submitButtonTriggered = false;
         private int _navigateHistory;
-
+        private string _tempInputValue;
 
         public void Start()
         {
@@ -70,6 +72,7 @@ namespace Tools.DevConsole.UI
             consoleLog ??= DevConsole.Logger ??= new ConsoleLog(MessageType.LOG);
             consoleLog.OnReceiveMessage += OnReceiveNewMessage;
             consoleLog.OnClear += Refresh;
+            consoleLog.UseUnityLogCallback = _ShowUnityLogs;
 
             // UI Elements assignment
             _cli__window = Q<VisualElement>(CLI_WINDOW);
@@ -97,9 +100,10 @@ namespace Tools.DevConsole.UI
             _toggle__warn.RegisterValueChangedCallback(OnToggleFilterChange);
             _toggle__error.RegisterValueChangedCallback(OnToggleFilterChange);
             _toggle__showlogs.RegisterValueChangedCallback(OnToggleUnityLogChange);
+            _toggle__error.value = _ShowUnityLogs;
 
             _inputField.RegisterValueChangedCallback(OnCommandInputChange);
-            _inputField.RegisterCallback<KeyDownEvent>(OnKeydownInput);
+            _inputField.RegisterCallback<KeyDownEvent>(OnKeydownInput, TrickleDown.TrickleDown);
 
             // Set the default values
             _label__content.text = string.Empty;
@@ -154,9 +158,10 @@ namespace Tools.DevConsole.UI
 
         public void OnKeydownInput(KeyDownEvent e)
         {
-            if ((e.keyCode == KeyCode.Tab || e.keyCode == KeyCode.RightArrow)
-                && _inputField.cursorIndex == _inputField.text.Length)
+            var isAcceptingSuggestions = e.keyCode == KeyCode.Tab || e.character == '\t' || e.keyCode == KeyCode.RightArrow;
+            if (isAcceptingSuggestions && _inputField.cursorIndex == _inputField.text.Length)
             {
+                e.StopImmediatePropagation();
                 e.StopPropagation();
                 e.PreventDefault();
 
@@ -170,6 +175,9 @@ namespace Tools.DevConsole.UI
                         list[list.Count - 1] = suggestions.First();
 
                         _inputField.value = string.Join(" ", list);
+
+                        // Since we can not change the cursor position, we need to select end to end to move the cursor to the end
+                        _inputField.SelectRange(_inputField.text.Length, _inputField.text.Length);
                     }
                     else
                     {
@@ -179,31 +187,43 @@ namespace Tools.DevConsole.UI
                 }
             }
 
-            if (e.keyCode == KeyCode.UpArrow)
+            if (e.keyCode == KeyCode.UpArrow || e.keyCode == KeyCode.DownArrow)
             {
                 e.StopPropagation();
                 e.PreventDefault();
 
-                _navigateHistory = Mathf.Clamp(--_navigateHistory, 0, DevConsole.CommandHistory.Count - 1);
-                _inputField.value = DevConsole.CommandHistory.ElementAt(_navigateHistory);
+                var navigationIndex =
+                    e.keyCode == KeyCode.UpArrow ? -1 :
+                    e.keyCode == KeyCode.DownArrow ? +1
+                    : 0;
+
+                _navigateHistory = Mathf.Clamp((_navigateHistory += navigationIndex), 0, DevConsole.CommandHistory.Count - 1);
+
+                if(_navigateHistory == -1 && navigationIndex == -1)
+                {
+                    _navigateHistory = consoleLog.LogHistory.Count - 1;
+                    _inputField.value = _tempInputValue;
+                    return;
+                }
+
+
+
+                if (_navigateHistory >= 0 && _navigateHistory < DevConsole.CommandHistory.Count) {
+
+                    if (_navigateHistory == DevConsole.CommandHistory.Count - 1 && navigationIndex == 1)
+                        _tempInputValue = _inputField.value;
+
+                    _inputField.value = DevConsole.CommandHistory.ElementAt(_navigateHistory);
+                }
             }
 
-            if (e.keyCode == KeyCode.DownArrow)
+            if (e.keyCode == KeyCode.Return || e.character == '\n')
             {
-                e.StopPropagation();
-                e.PreventDefault();
-
-                _navigateHistory = Mathf.Clamp(++_navigateHistory, 0, DevConsole.CommandHistory.Count - 1);
-                _inputField.value = DevConsole.CommandHistory.ElementAt(_navigateHistory);
-            }
-
-            if (e.keyCode == KeyCode.Return)
-            {
+                e.StopImmediatePropagation();
                 e.StopPropagation();
                 e.PreventDefault();
 
                 OnCommandInputSubmit(_inputField.text);
-                _inputField.value = string.Empty;
             }
         }
 
@@ -213,8 +233,9 @@ namespace Tools.DevConsole.UI
                 _defaultTimeScale = Time.timeScale;
 
             Time.timeScale = hide ? 0f : _defaultTimeScale;
-
             _UIDocument.rootVisualElement.style.display = hide ? DisplayStyle.Flex : DisplayStyle.None;
+
+            _inputField.Focus();
         }
 
         #region [Events]
@@ -257,10 +278,7 @@ namespace Tools.DevConsole.UI
 
         private void OnCommandInputSubmit(string arg)
         {
-
-            //Prevent submit command when inputfield loose the focus
-            if (!Input.GetButtonDown("Submit") && !_submitButtonTriggered)
-                return;
+            Debug.Log($"OnCommandInputSubmit: {arg}");
 
             _submitButtonTriggered = false;
 
@@ -268,7 +286,6 @@ namespace Tools.DevConsole.UI
             _inputField.Focus();
 
             DevConsole.RunCommand(arg);
-
             _navigateHistory = consoleLog.LogHistory.Count - 1;
         }
 
