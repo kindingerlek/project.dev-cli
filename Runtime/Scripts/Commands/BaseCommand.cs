@@ -3,8 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Tools.DevConsole.Interfaces;
 
 namespace Tools.DevConsole.Commands
@@ -52,7 +50,7 @@ namespace Tools.DevConsole.Commands
         {
             get
             {
-                StringBuilder str = new StringBuilder();
+                StringBuilder str = new();
 
                 str.AppendLine($"NAME:");
                 str.AppendLine($"\t{CommandName} - {Description}");
@@ -82,23 +80,19 @@ namespace Tools.DevConsole.Commands
                     str.AppendLine($"\nEXAMPLE:");
                     str.AppendLine($"\t{Example}");
                 }
-                return $"<color=silver>{str.ToString()}</color>";
+                return $"<color=#aaaaaa>{str}</color>";
             }
         }
-
-        
 
         public bool Execute(string[] commandParts)
         {
             if (Arguments != null && Arguments.Where(x => x.Required).Any() && (commandParts == null || commandParts.Length == 0))
                 throw new Exception($"No argument was provided! Type 'help commandName' to see available arguments.");
 
-            OptionsList optList = new OptionsList(commandParts, Options, out string[] remain);
-            ArgumentsList argList = new ArgumentsList(remain, Arguments);
+            OptionsList optList = new(commandParts, Options, out string[] remain);
+            ArgumentsList argList = new(remain, Arguments);
             return Handle(argList, optList);
         }
-
-
 
         protected abstract bool Handle(ArgumentsList args, OptionsList opts);
     }

@@ -1,9 +1,7 @@
 ﻿using Tools.DevConsole.Interfaces;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Tools.DevConsole.Commands
 {
@@ -13,7 +11,7 @@ namespace Tools.DevConsole.Commands
         {
         }
 
-        public override List<CommandArgument> Arguments => new List<CommandArgument>()
+        public override List<CommandArgument> Arguments => new()
         {
             new CommandArgument("", false, "The command you need help", typeof(string)),
         };
@@ -26,7 +24,7 @@ namespace Tools.DevConsole.Commands
 
         protected override bool Handle(ArgumentsList args, OptionsList opts)
         {
-            StringBuilder str = new StringBuilder();
+            StringBuilder str = new();
 
             var commandList = DevConsole.CommandList
                 .Where(x => !x.Value.IsSecretCommand)

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Tools.DevConsole.Exceptions;
 
 namespace Tools.DevConsole
@@ -31,7 +28,7 @@ namespace Tools.DevConsole
 
         public static string[] GetCommandParts(string commandString)
         {
-            LinkedList<char> parmChars = new LinkedList<char>(commandString.ToCharArray());
+            LinkedList<char> parmChars = new (commandString.ToCharArray());
             bool inQuote = false;
             var node = parmChars.First;
 

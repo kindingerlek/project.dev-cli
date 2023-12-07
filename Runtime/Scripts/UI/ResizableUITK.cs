@@ -1,10 +1,6 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System.Collections.Generic;
-using Tools.EditorExtensions;
 using UnityEngine.UIElements;
-using System.Linq;
 using NaughtyAttributes;
 
 namespace Tools.UI

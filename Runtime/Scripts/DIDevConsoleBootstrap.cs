@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Tools.DevConsole.Interfaces;
+﻿using Tools.DevConsole.Interfaces;
 using Tools.DevConsole.UI;
 using UnityEngine;
 

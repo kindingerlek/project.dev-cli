@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Tools.DevConsole.Interfaces;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 namespace Tools.DevConsole.Commands
 {
@@ -18,7 +13,7 @@ namespace Tools.DevConsole.Commands
         public override string Description =>
             "Reset & saves PlayerPrefs.";
         
-        public override List<CommandArgument> Arguments => new List<CommandArgument>()
+        public override List<CommandArgument> Arguments => new()
         {
             new CommandArgument("all",false,"Clear all keys in PlayerPrefs",null),
             new CommandArgument("key",false,"Clear specific key in PlayerPrefs",typeof(string))

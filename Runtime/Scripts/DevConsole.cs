@@ -28,7 +28,9 @@ namespace Tools.DevConsole
             }
             set
             {
-                _commandList = value;
+
+                foreach (var command in value)
+                    CommandList.TryAdd(command.Key, command.Value);
             }
         }
 
@@ -105,8 +107,7 @@ namespace Tools.DevConsole
         private static void RegisterCommands()
         {
             // Initialize commands dictionary
-            if(_commandList == null)
-                _commandList = new Dictionary<string, BaseCommand>();
+            _commandList ??= new Dictionary<string, BaseCommand>();
 
             // Retrive all classes which derives from BaseCommand's class
             var allCommandsTypes = Assembly.GetAssembly(typeof(BaseCommand)).GetTypes()
@@ -118,7 +119,7 @@ namespace Tools.DevConsole
                 var commandObj = Activator.CreateInstance(commandType, Logger) as BaseCommand;
                 var commandName = commandObj.CommandName;
                
-                _commandList[commandName] = commandObj;
+                _commandList.TryAdd(commandName, commandObj);
             }
         }
 
@@ -130,22 +131,20 @@ namespace Tools.DevConsole
             var commandObj = Activator.CreateInstance(typeof(T), Logger) as BaseCommand;
             var commandName = commandObj.CommandName;
 
-            if (_commandList == null)
-                _commandList = new Dictionary<string, BaseCommand>();
-
-            _commandList[commandName] = commandObj;
+            CommandList.TryAdd(commandName, commandObj);
         }
 
         public static string[] GetSuggestions(string commandLine)
         {
             var commandParts = Helper.GetCommandParts(commandLine).ToArray();
 
+            if (commandParts.Length == 0)
+                return null;
+
             if (commandParts.Length == 1)
                 return CommandList.Keys.Where(x => x.StartsWith(commandParts[0])).ToArray();
-            
-            ISuggestible suggestible = (CommandList.FirstOrDefault(x => x.Value.CommandName == commandParts[0]).Value) as ISuggestible;
 
-            if (suggestible == null)
+            if ((CommandList.FirstOrDefault(x => x.Value.CommandName == commandParts[0]).Value) is not ISuggestible suggestible)
                 return null;
 
             return suggestible.GetSuggestions(commandParts);

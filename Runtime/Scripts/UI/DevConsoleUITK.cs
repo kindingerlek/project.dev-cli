@@ -1,34 +1,26 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Tools.DevConsole.Interfaces;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UIElements;
 
 namespace Tools.DevConsole.UI
 {
     [RequireComponent(typeof(UIDocument))]
-    [ExecuteAlways]
     public class DevConsoleUITK : MonoBehaviour
     {
         const string CLEAR_BUTTON = "clear-button";
         const string SUBMIT_BUTTON = "submit-button";
         const string CLOSE_BUTTON = "close-button";
-
         const string INFO_TOGGLE = "info-toggle";
         const string WARN_TOGGLE = "warn-toggle";
         const string ERROR_TOGGLE = "error-toggle";
         const string SHOWLOGS_TOGGLE = "showlogs-toggle";
-
         const string COMMAND_INPUT = "command-input";
-
         const string LABEL_PLACEHOLDER = "placeholder-label";
         const string LABEL_CONTENT = "content-label";
-
         const string CLI_WINDOW = "DevCliWindow";
 
         public UIDocument _UIDocument;
@@ -47,20 +39,16 @@ namespace Tools.DevConsole.UI
         private Button _button__close;
         private Button _button__clear;
         private Button _button__submit;
-
         private Toggle _toggle__info;
         private Toggle _toggle__warn;
         private Toggle _toggle__error;
         private Toggle _toggle__showlogs;
-
         private Label _label__content;
         private Label _label__placeholder;
         private TextField _inputField;
         private VisualElement _cli__window;
 
-
         private float _defaultTimeScale = 1f;
-        private bool _submitButtonTriggered = false;
         private int _navigateHistory;
         private string _tempInputValue;
 
@@ -69,6 +57,7 @@ namespace Tools.DevConsole.UI
             _UIDocument = GetComponent<UIDocument>();
             _defaultTimeScale = Time.timeScale;
 
+            // Set the console log interceptor
             consoleLog ??= DevConsole.Logger ??= new ConsoleLog(MessageType.LOG);
             consoleLog.OnReceiveMessage += OnReceiveNewMessage;
             consoleLog.OnClear += Refresh;
@@ -76,66 +65,61 @@ namespace Tools.DevConsole.UI
 
             // UI Elements assignment
             _cli__window = Q<VisualElement>(CLI_WINDOW);
-
             _button__close = Q<Button>(CLOSE_BUTTON);
             _button__clear = Q<Button>(CLEAR_BUTTON);
             _button__submit = Q<Button>(SUBMIT_BUTTON);
-
             _toggle__info = Q<Toggle>(INFO_TOGGLE);
             _toggle__warn = Q<Toggle>(WARN_TOGGLE);
             _toggle__error = Q<Toggle>(ERROR_TOGGLE);
             _toggle__showlogs = Q<Toggle>(SHOWLOGS_TOGGLE);
-
             _label__placeholder = Q<Label>(LABEL_PLACEHOLDER);
             _label__content = Q<Label>(LABEL_CONTENT);
             _inputField = Q<TextField>(COMMAND_INPUT);
-
 
             // Events assignment
             _button__close.clicked += OnCloseButtonClick;
             _button__clear.clicked += OnClearButtonClick;
             _button__submit.clicked += OnSubmitButtonClick;
-
             _toggle__info.RegisterValueChangedCallback(OnToggleFilterChange);
             _toggle__warn.RegisterValueChangedCallback(OnToggleFilterChange);
             _toggle__error.RegisterValueChangedCallback(OnToggleFilterChange);
             _toggle__showlogs.RegisterValueChangedCallback(OnToggleUnityLogChange);
-            _toggle__error.value = _ShowUnityLogs;
-
             _inputField.RegisterValueChangedCallback(OnCommandInputChange);
             _inputField.RegisterCallback<KeyDownEvent>(OnKeydownInput, TrickleDown.TrickleDown);
 
             // Set the default values
+            _inputField.value = string.Empty;
             _label__content.text = string.Empty;
             _label__placeholder.text = string.Empty;
-
             _toggle__info.value = true;
             _toggle__warn.value = true;
             _toggle__error.value = true;
+            _toggle__showlogs.value = _ShowUnityLogs;
 
             // Move the placeholder label to the back of the text from input field
             _label__placeholder.SendToBack();
 
-            StartCoroutine(AlignCenter());
+            StartCoroutine(CentralizeWindow());
             ShowConsoleUI(_ShowOnStart);
         }
 
-        public T Q<T>(string name) where T : VisualElement
-        {
-            return _UIDocument.rootVisualElement.Q<T>(name);
-        }
+        public T Q<T>(string name) where T : VisualElement => _UIDocument.rootVisualElement.Q<T>(name);
 
         // Since the UI is created at runtime, we need to wait for the next frame to align it to the center of the screen
-        public IEnumerator AlignCenter()
+        public IEnumerator CentralizeWindow()
         {
+            // Hide the window to avoid flickering
+            _cli__window.style.visibility = Visibility.Hidden;
+
             yield return new WaitForEndOfFrame();
+
             var windowSize = _cli__window.contentRect.size;
             var screenSize = UiHelper.GetScaledViewport(_UIDocument.panelSettings);
-
             var margin = (screenSize - windowSize) / 2f;
 
             _cli__window.style.marginLeft = margin.x;
             _cli__window.style.marginTop = margin.y;
+            _cli__window.style.visibility = Visibility.Visible;
         }
 
         public void OnValidate()
@@ -161,30 +145,27 @@ namespace Tools.DevConsole.UI
             var isAcceptingSuggestions = e.keyCode == KeyCode.Tab || e.character == '\t' || e.keyCode == KeyCode.RightArrow;
             if (isAcceptingSuggestions && _inputField.cursorIndex == _inputField.text.Length)
             {
-                e.StopImmediatePropagation();
-                e.StopPropagation();
-                e.PreventDefault();
 
                 var suggestions = DevConsole.GetSuggestions(_inputField.text);
-                if (suggestions != null)
+                if (suggestions == null)
+                    return;
+
+                // If there are more than one suggestion, print the suggestions
+                if (suggestions.Length != 1)
                 {
-                    if (suggestions.Length == 1)
-                    {
-                        //commandInputField.text = suggestions.First();
-                        var list = Helper.GetCommandParts(_inputField.text).ToList();
-                        list[list.Count - 1] = suggestions.First();
-
-                        _inputField.value = string.Join(" ", list);
-
-                        // Since we can not change the cursor position, we need to select end to end to move the cursor to the end
-                        _inputField.SelectRange(_inputField.text.Length, _inputField.text.Length);
-                    }
-                    else
-                    {
-                        consoleLog.Log($" > {_inputField.text}");
-                        consoleLog.Log(string.Join("\n", suggestions));
-                    }
+                    consoleLog.Log($" > {_inputField.text}");
+                    consoleLog.Log(string.Join("\n", suggestions));
+                    return;
                 }
+
+                // Replace the last word with the suggestion
+                var list = Helper.GetCommandParts(_inputField.text).ToList();
+                list[^1] = suggestions.First();
+
+                _inputField.value = string.Join(" ", list);
+
+                // Since we can not change the cursor position, we need to select end to end to move the cursor to the end
+                _inputField.SelectRange(_inputField.text.Length, _inputField.text.Length);
             }
 
             if (e.keyCode == KeyCode.UpArrow || e.keyCode == KeyCode.DownArrow)
@@ -197,24 +178,23 @@ namespace Tools.DevConsole.UI
                     e.keyCode == KeyCode.DownArrow ? +1
                     : 0;
 
-                _navigateHistory = Mathf.Clamp((_navigateHistory += navigationIndex), 0, DevConsole.CommandHistory.Count - 1);
+                _navigateHistory = Mathf.Clamp(_navigateHistory += navigationIndex, 0, DevConsole.CommandHistory.Count - 1);
 
-                if(_navigateHistory == -1 && navigationIndex == -1)
+                if (_navigateHistory == -1 && navigationIndex == -1)
                 {
                     _navigateHistory = consoleLog.LogHistory.Count - 1;
                     _inputField.value = _tempInputValue;
                     return;
                 }
 
+                if (_navigateHistory < 0 || _navigateHistory >= DevConsole.CommandHistory.Count)
+                    return;
 
+                if (_navigateHistory == DevConsole.CommandHistory.Count - 1 && navigationIndex == 1)
+                    _tempInputValue = _inputField.value;
 
-                if (_navigateHistory >= 0 && _navigateHistory < DevConsole.CommandHistory.Count) {
+                _inputField.value = DevConsole.CommandHistory.ElementAt(_navigateHistory);
 
-                    if (_navigateHistory == DevConsole.CommandHistory.Count - 1 && navigationIndex == 1)
-                        _tempInputValue = _inputField.value;
-
-                    _inputField.value = DevConsole.CommandHistory.ElementAt(_navigateHistory);
-                }
             }
 
             if (e.keyCode == KeyCode.Return || e.character == '\n')
@@ -224,6 +204,7 @@ namespace Tools.DevConsole.UI
                 e.PreventDefault();
 
                 OnCommandInputSubmit(_inputField.text);
+                return;
             }
         }
 
@@ -241,27 +222,34 @@ namespace Tools.DevConsole.UI
         #region [Events]
         private void OnCommandInputChange(ChangeEvent<string> e)
         {
-            // Change the placeholder text to fit to a plausible desirable command
-            var inputValue = e.newValue;
-            var plausibleCommand = DevConsole.CommandList.Where(x => x.Value.CommandName.StartsWith(inputValue));
 
-            _label__placeholder.text = plausibleCommand.Count() == 1 && !string.IsNullOrEmpty(inputValue) ? plausibleCommand.First().Value.CommandName : string.Empty;
+            var suggestions = DevConsole.GetSuggestions(e.newValue);
+            if (suggestions == null || suggestions.Length != 1)
+                return;
+
+            var list = Helper.GetCommandParts(e.newValue).ToList();
+            if(list.Count == 0)
+                return;
+
+            // Replace the last word with the suggestion
+            list[^1] = suggestions.First();
+
+            _label__placeholder.text = string.Join(" ", list);
         }
 
-        private void OnToggleUnityLogChange(ChangeEvent<bool> evt)
+        private void OnToggleUnityLogChange(ChangeEvent<bool> e)
         {
-            consoleLog.UseUnityLogCallback = evt.newValue;
+            consoleLog.UseUnityLogCallback = e.newValue;
             Refresh();
         }
 
-        private void OnToggleFilterChange(ChangeEvent<bool> evt)
+        private void OnToggleFilterChange(ChangeEvent<bool> e)
         {
             Refresh();
         }
 
         public void OnSubmitButtonClick()
         {
-            _submitButtonTriggered = true;
             OnCommandInputSubmit(_inputField.text);
             Refresh();
         }
@@ -278,20 +266,15 @@ namespace Tools.DevConsole.UI
 
         private void OnCommandInputSubmit(string arg)
         {
-            Debug.Log($"OnCommandInputSubmit: {arg}");
-
-            _submitButtonTriggered = false;
-
             _inputField.value = string.Empty;
             _inputField.Focus();
 
             DevConsole.RunCommand(arg);
             _navigateHistory = consoleLog.LogHistory.Count - 1;
         }
-
-
         #endregion
 
+        // Filter the messages based on the toggles and update the content label
         private void Refresh()
         {
             var newContent = new StringBuilder();
@@ -324,13 +307,15 @@ namespace Tools.DevConsole.UI
         {
             var m = message.Text.TrimEnd(Environment.NewLine.ToCharArray());
 
-            return message.Type switch
+            var color = message.Type switch
             {
-                MessageType.DEBUG => $"<color=#{ColorUtility.ToHtmlStringRGB(debugColor)}>{m}</color>\n",
-                MessageType.WARNING => $"<color=#{ColorUtility.ToHtmlStringRGB(warningColor)}>{m}</color>\n",
-                MessageType.ERROR => $"<color=#{ColorUtility.ToHtmlStringRGB(errorColor)}>{m}</color>\n",
-                _ => $"<color=#{ColorUtility.ToHtmlStringRGB(logColor)}>{m}</color>\n",
+                MessageType.DEBUG => debugColor,
+                MessageType.WARNING => warningColor,
+                MessageType.ERROR => errorColor,
+                _ => logColor,
             };
+
+            return $"<color=#{ColorUtility.ToHtmlStringRGB(color)}>{m}</color>\n";
         }
     }
 }

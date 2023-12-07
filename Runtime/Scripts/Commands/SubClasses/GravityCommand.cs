@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Tools.DevConsole;
-using Tools.DevConsole.Commands;
+﻿using System.Collections.Generic;
 using Tools.DevConsole.Interfaces;
 using UnityEngine;
 
-namespace DevConsole.Commands.SubClasses
+namespace Tools.DevConsole.Commands
 {
     public class GravityCommand : BaseCommand
     {
@@ -18,13 +12,13 @@ namespace DevConsole.Commands.SubClasses
 
         public override string Description => "Get and set the gravity of game";
 
-        public override List<CommandArgument> Arguments => new List<CommandArgument>()
+        public override List<CommandArgument> Arguments => new()
         {
             new CommandArgument(Name: "get",required: false, "returns the current value of gravity", null),
             new CommandArgument(Name: "set",required: false, "set the value of current gravity", typeof(float))
         };
 
-        public override List<CommandOption> Options => new List<CommandOption>()
+        public override List<CommandOption> Options => new()
         {
         };
 

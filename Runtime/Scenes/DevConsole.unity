@@ -262,5 +262,9 @@ PrefabInstance:
       propertyPath: m_Name
       value: UIDocument
       objectReference: {fileID: 0}
+    - target: {fileID: 3911217734398688958, guid: e1ece99239781fd47afad8bd9723e375, type: 3}
+      propertyPath: _ShowUnityLogs
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e1ece99239781fd47afad8bd9723e375, type: 3}

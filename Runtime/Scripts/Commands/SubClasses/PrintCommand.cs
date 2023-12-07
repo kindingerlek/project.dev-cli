@@ -1,9 +1,5 @@
 ﻿using Tools.DevConsole.Interfaces;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Tools.DevConsole.Commands
 {
@@ -20,12 +16,12 @@ namespace Tools.DevConsole.Commands
         public override string Example =>
             "print \"The quick brown fox jumps over the lazy dog\"";
 
-        public override List<CommandArgument> Arguments => new List<CommandArgument>()
+        public override List<CommandArgument> Arguments => new()
         {
             new CommandArgument("test", false, "asd", typeof(string)),
         };
 
-        public override List<CommandOption> Options => new List<CommandOption>()
+        public override List<CommandOption> Options => new()
         {
             new CommandOption('u', "upper", "print in uppercase", null),
             new CommandOption('l', "lower", "print in lowercase", null),

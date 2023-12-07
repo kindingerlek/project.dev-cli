@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Tools.DevConsole.Interfaces;
 using UnityEngine.SceneManagement;
 
-namespace Tools.DevConsole.Commands.SubClasses
+namespace Tools.DevConsole.Commands
 {
     public class LoadSceneCommand : BaseCommand
     {
-        public override List<CommandArgument> Arguments => new List<CommandArgument>()
+        public override List<CommandArgument> Arguments => new()
         {
             new CommandArgument("sceneName", true, "The name of the scene you want load", typeof(string))
         };
