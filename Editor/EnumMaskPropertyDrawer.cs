@@ -334,11 +334,11 @@ namespace Tools.EditorExtensions
             return elemVal.Equals(DoNotOperator(Convert.ChangeType(0, enumUnderlyingType), enumUnderlyingType));
         }
     }
+}
 #endif
 
-    [System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
-    public class EnumMaskAttribute : PropertyAttribute
-    {
+[System.AttributeUsage(System.AttributeTargets.Field, AllowMultiple = false)]
+public class EnumMaskAttribute : PropertyAttribute
+{
 
-    } 
-}
+} 
