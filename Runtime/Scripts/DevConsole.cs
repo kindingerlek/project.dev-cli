@@ -1,19 +1,11 @@
-﻿using Utils.String;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Tools.DevConsole.Commands;
-using Tools.DevConsole.Exceptions;
-using Tools.DevConsole.Interfaces;
-
-namespace Tools.DevConsole
+﻿namespace Tools.DevConsole
 {
-    public static class DevConsole 
+    public static class DevConsole
     {
         private static string repeatCmdName = "!!";
-        private static int maxCommandHistory = 50;
+        private static readonly int maxCommandHistory = 50;
         private static Dictionary<string, BaseCommand> _commandList;
+        private static List<Assembly> _customAssemblies = new List<Assembly>();
         public static IConsoleLog Logger { get; set; }
         internal static Queue<string> CommandHistory { get; private set; } = new Queue<string>();
         internal static Dictionary<string, BaseCommand> CommandList
@@ -69,17 +61,21 @@ namespace Tools.DevConsole
 
                     // Looking for similar command
                     var similarCommand = CommandList
-                        .Select(x => new
-                        {
-                            commandName = x.Key,
-                            similarity = x.Key.CalculateSimilarity(command)
-                        })
+                        .Select(
+                            x =>
+                                new
+                                {
+                                    commandName = x.Key,
+                                    similarity = x.Key.CalculateSimilarity(command)
+                                }
+                        )
                         .OrderByDescending(x => x.similarity)
                         .FirstOrDefault();
 
                     // Print if there are a similar command
                     if (similarCommand != null && similarCommand.similarity >= 0.6f)
-                        errorMessage += $"\nThe most similar command is\n\t{similarCommand.commandName}";
+                        errorMessage +=
+                            $"\nThe most similar command is\n\t{similarCommand.commandName}";
 
                     Logger.Error(errorMessage);
                     return false;
@@ -109,24 +105,128 @@ namespace Tools.DevConsole
             // Initialize commands dictionary
             _commandList ??= new Dictionary<string, BaseCommand>();
 
-            // Retrive all classes which derives from BaseCommand's class
-            var allCommandsTypes = Assembly.GetAssembly(typeof(BaseCommand)).GetTypes()
-                .Where(t => typeof(BaseCommand).IsAssignableFrom(t) && t.IsAbstract == false);
+            // Get all assemblies to search
+            var assembliesToSearch = GetAssembliesToSearch();
 
-            // For all commandsTypes, intantiate it, and store in dictonary
+            // Search for BaseCommand subclasses
+            var allCommandsTypes = new List<Type>();
+
+            foreach (var assembly in assembliesToSearch)
+            {
+                try
+                {
+                    var types = assembly
+                        .GetTypes()
+                        .Where(
+                            t =>
+                                typeof(BaseCommand).IsAssignableFrom(t)
+                                && !t.IsAbstract
+                                && t != typeof(BaseCommand)
+                        );
+
+                    allCommandsTypes.AddRange(types);
+                }
+                catch (ReflectionTypeLoadException)
+                {
+                    // Skip assemblies that can't be loaded
+                    continue;
+                }
+                catch (System.IO.FileNotFoundException)
+                {
+                    // Skip missing dependency assemblies
+                    continue;
+                }
+            }
+
+            // Instantiate and register all command types
             foreach (var commandType in allCommandsTypes)
             {
-                var commandObj = Activator.CreateInstance(commandType, Logger) as BaseCommand;
-                var commandName = commandObj.CommandName;
-               
-                _commandList.TryAdd(commandName, commandObj);
+                try
+                {
+                    var commandObj = Activator.CreateInstance(commandType, Logger) as BaseCommand;
+                    var commandName = commandObj.CommandName;
+
+                    _commandList.TryAdd(commandName, commandObj);
+                }
+                catch (Exception ex)
+                {
+                    Logger?.Error($"Failed to register command {commandType.Name}: {ex.Message}");
+                }
             }
+        }
+
+        private static Assembly[] GetAssembliesToSearch()
+        {
+            var assemblies = new List<Assembly>();
+
+            // Always include the DevCLI assembly itself
+            assemblies.Add(Assembly.GetAssembly(typeof(BaseCommand)));
+
+            // Add explicitly registered assemblies
+            assemblies.AddRange(_customAssemblies);
+
+            // Add all currently loaded assemblies, excluding system ones
+            foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            {
+                var assemblyName = assembly.FullName;
+
+                // Skip system assemblies for performance
+                if (
+                    assemblyName.StartsWith("System.")
+                    || assemblyName.StartsWith("Microsoft.")
+                    || assemblyName.StartsWith("mscorlib")
+                    || assemblyName.StartsWith("netstandard")
+                    || assemblyName.StartsWith("Unity.")
+                    || assemblyName.StartsWith("UnityEngine.")
+                    || assemblyName.StartsWith("UnityEditor.")
+                )
+                    continue;
+
+                if (!assemblies.Contains(assembly))
+                    assemblies.Add(assembly);
+            }
+
+            return assemblies.ToArray();
+        }
+
+        /// <summary>
+        /// Register a specific assembly to be searched for BaseCommand subclasses.
+        /// This is useful when you want to ensure commands from specific assemblies are discovered.
+        /// </summary>
+        /// <param name="assembly">The assembly to register for command discovery</param>
+        public static void RegisterAssembly(Assembly assembly)
+        {
+            if (assembly == null)
+                return;
+
+            if (!_customAssemblies.Contains(assembly))
+            {
+                _customAssemblies.Add(assembly);
+
+                // Force re-registration of commands if they were already loaded
+                if (_commandList != null && _commandList.Count > 0)
+                {
+                    _commandList.Clear();
+                    RegisterCommands();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Register the calling assembly to be searched for BaseCommand subclasses.
+        /// Call this from your game code to ensure your custom commands are discovered.
+        /// </summary>
+        public static void RegisterCallingAssembly()
+        {
+            RegisterAssembly(Assembly.GetCallingAssembly());
         }
 
         public static void RegisterNewCommand<T>()
         {
             if (!typeof(T).IsSubclassOf(typeof(BaseCommand)))
-                throw new DevConsoleException($"Can not register {typeof(T).Name} because is not inherent of BaseCommand class.");
+                throw new DevConsoleException(
+                    $"Can not register {typeof(T).Name} because is not inherent of BaseCommand class."
+                );
 
             var commandObj = Activator.CreateInstance(typeof(T), Logger) as BaseCommand;
             var commandName = commandObj.CommandName;
@@ -144,10 +244,13 @@ namespace Tools.DevConsole
             if (commandParts.Length == 1)
                 return CommandList.Keys.Where(x => x.StartsWith(commandParts[0])).ToArray();
 
-            if ((CommandList.FirstOrDefault(x => x.Value.CommandName == commandParts[0]).Value) is not ISuggestible suggestible)
+            if (
+                (CommandList.FirstOrDefault(x => x.Value.CommandName == commandParts[0]).Value)
+                is not ISuggestible suggestible
+            )
                 return null;
 
             return suggestible.GetSuggestions(commandParts);
-        }            
+        }
     }
 }
