@@ -1,6 +1,6 @@
 {
     "name": "kindingerlek.dev-cli",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "displayName": "Developer CLI",
     "description": "A CLI for Unity developers.",
     "unity": "2019.1",

@@ -45,12 +45,12 @@ namespace Tools.DevConsole
         {
             // Common Unity assembly names that might contain custom commands
             string[] commonAssemblyNames =
-            [
+            {
                 "Assembly-CSharp",
                 "Assembly-CSharp-firstpass",
                 "GameAssembly",
                 "Scripts"
-            ];
+            };
 
             foreach (var assemblyName in commonAssemblyNames)
             {

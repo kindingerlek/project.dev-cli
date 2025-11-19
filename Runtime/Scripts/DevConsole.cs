@@ -1,11 +1,20 @@
-﻿namespace Tools.DevConsole
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+
+using Tools.DevConsole.Commands;
+using Tools.DevConsole.Interfaces;
+using Utils.String;
+
+namespace Tools.DevConsole
 {
     public static class DevConsole
     {
-        private static string repeatCmdName = "!!";
+        private static readonly string repeatCmdName = "!!";
         private static readonly int maxCommandHistory = 50;
         private static Dictionary<string, BaseCommand> _commandList;
-        private static List<Assembly> _customAssemblies = new List<Assembly>();
+        private static readonly List<Assembly> _customAssemblies = new();
         public static IConsoleLog Logger { get; set; }
         internal static Queue<string> CommandHistory { get; private set; } = new Queue<string>();
         internal static Dictionary<string, BaseCommand> CommandList
@@ -157,16 +166,17 @@
 
         private static Assembly[] GetAssembliesToSearch()
         {
-            var assemblies = new List<Assembly>();
-
-            // Always include the DevCLI assembly itself
-            assemblies.Add(Assembly.GetAssembly(typeof(BaseCommand)));
+            var assemblies = new List<Assembly>
+            {
+                // Always include the DevCLI assembly itself
+                Assembly.GetAssembly(typeof(BaseCommand))
+            };
 
             // Add explicitly registered assemblies
             assemblies.AddRange(_customAssemblies);
 
             // Add all currently loaded assemblies, excluding system ones
-            foreach (var assembly in System.AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 var assemblyName = assembly.FullName;
 
@@ -224,7 +234,7 @@
         public static void RegisterNewCommand<T>()
         {
             if (!typeof(T).IsSubclassOf(typeof(BaseCommand)))
-                throw new DevConsoleException(
+                throw new Exception(
                     $"Can not register {typeof(T).Name} because is not inherent of BaseCommand class."
                 );
 
@@ -245,7 +255,7 @@
                 return CommandList.Keys.Where(x => x.StartsWith(commandParts[0])).ToArray();
 
             if (
-                (CommandList.FirstOrDefault(x => x.Value.CommandName == commandParts[0]).Value)
+                CommandList.FirstOrDefault(x => x.Value.CommandName == commandParts[0]).Value
                 is not ISuggestible suggestible
             )
                 return null;
